@@ -3,70 +3,93 @@ import { renderScene } from './core/renderer.js';
 import { initTouchDrag } from './interaction/touchDrag.js';
 import { initUploadPanel } from './ui/uploadPanel.js';
 import { Timeline } from './animation/timeline.js';
-import { interpolateBones } from './animation/easing.js';
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const timeline = new Timeline();
 
-let onionSkinEnabled = false;
+let isPlaying = false;
+let playInterval = null;
 
+// تهيئة اللوحة الأساسية
 initUploadPanel(rig, () => {
-    renderScene(ctx, rig, [], timeline.currentFrame);
+    updateScene();
 });
 
+// عند سحب العظمة وانتهائها (Mouse Up)، يتم تسجيل Keyframe تلقائياً في الزمن الحالي!
 initTouchDrag(canvas, rig, () => {
-    renderScene(ctx, rig, getOnionSkins(), timeline.currentFrame);
+    updateScene();
+}, () => {
+    // حدث عند الانتهاء من السحب (Auto-Keyframing)
+    timeline.setKeyframe(timeline.currentTime, rig.bones);
+    updateKeyframeUI();
 });
 
-document.getElementById('saveKeyframeBtn').addEventListener('click', () => {
-    timeline.addKeyframe(rig.bones);
-    updateFramesTrack();
-    document.getElementById('frameCount').innerText = `الفريمات: ${timeline.getFrameCount()}`;
-    document.getElementById('scrubBar').max = Math.max(1, timeline.getFrameCount() - 1);
+// شريط التحكم بالزمن (Scrubber)
+const timeScrubber = document.getElementById('timeScrubber');
+timeScrubber.addEventListener('input', (e) => {
+    timeline.currentTime = parseFloat(e.target.value);
+    document.getElementById('timeDisplayinnerText').innerText = `الوقت: ${timeline.currentTime.toFixed(1)}s`;
+    
+    // جلب وضعية الشخصية المحسوبة في هذا الوقت بالذات
+    const evaluatedBones = timeline.evaluate(timeline.currentTime);
+    if (evaluatedBones) {
+        rig.bones = evaluatedBones;
+    }
+    renderScene(ctx, rig, [], 0);
+});
+
+// زر التشغيل (Play)
+document.getElementById('playBtn').addEventListener('click', () => {
+    if (isPlaying) {
+        clearInterval(playInterval);
+        isPlaying = false;
+        document.getElementById('playBtn').innerText = '▶️ تشغيل المشهد';
+        return;
+    }
+
+    if (timeline.getKeyframeCount() < 2) {
+        alert('يرجى تحريك الشخصية في أوقات مختلفة أولاً لإنشاء حركات مفتاحية (Keyframes)!');
+        return;
+    }
+
+    isPlaying = true;
+    document.getElementById('playBtn').innerText = '⏸️ إيقاف مؤقت';
+    timeline.currentTime = 0;
+
+    playInterval = setInterval(() => {
+        timeline.currentTime += 0.1;
+        if (timeline.currentTime > timeline.duration) {
+            timeline.currentTime = 0;
+        }
+        timeScrubber.value = timeline.currentTime;
+        document.getElementById('timeDisplay').innerText = `الوقت: ${timeline.currentTime.toFixed(1)}s`;
+
+        const evaluatedBones = timeline.evaluate(timeline.currentTime);
+        if (evaluatedBones) {
+            rig.bones = evaluatedBones;
+        }
+        renderScene(ctx, rig, [], 0);
+    }, 100);
 });
 
 document.getElementById('resetPoseBtn').addEventListener('click', () => {
     window.location.reload();
 });
 
-document.getElementById('onionBtn').addEventListener('click', () => {
-    onionSkinEnabled = !onionSkinEnabled;
-    document.getElementById('onionBtn').innerText = `🧅 قشر البصل: ${onionSkinEnabled ? 'مفعل' : 'معطل'}`;
-    renderScene(ctx, rig, getOnionSkins(), timeline.currentFrame);
+document.getElementById('clearTimelineBtn').addEventListener('click', () => {
+    timeline.clear();
+    updateKeyframeUI();
+    renderScene(ctx, rig, [], 0);
 });
 
-document.getElementById('scrubBar').addEventListener('input', (e) => {
-    const val = parseFloat(e.target.value);
-    if (timeline.getFrameCount() > 1) {
-        const total = timeline.getFrameCount() - 1;
-        const progress = val / total;
-        const frameIdx1 = Math.floor(progress * total);
-        const frameIdx2 = Math.min(total, frameIdx1 + 1);
-        const subProgress = (progress * total) - frameIdx1;
-
-        const easingType = document.getElementById('easingSelect').value;
-        if (timeline.frames[frameIdx1] && timeline.frames[frameIdx2]) {
-            rig.bones = interpolateBones(timeline.frames[frameIdx1], timeline.frames[frameIdx2], subProgress, easingType);
-        }
-    }
-    renderScene(ctx, rig, getOnionSkins(), timeline.currentFrame);
-});
-
-function getOnionSkins() {
-    if (!onionSkinEnabled || timeline.frames.length === 0) return [];
-    return timeline.frames.slice(Math.max(0, timeline.currentFrame - 2), timeline.currentFrame);
+function updateKeyframeUI() {
+    document.getElementById('keyframeCount').innerText = `الـ Keyframes: ${timeline.getKeyframeCount()}`;
 }
 
-function updateFramesTrack() {
-    const track = document.getElementById('framesTrack');
-    track.innerHTML = '';
-    timeline.frames.forEach((_, idx) => {
-        const thumb = document.createElement('div');
-        thumb.className = `frame-thumb ${idx === timeline.currentFrame ? 'active' : ''}`;
-        thumb.innerText = `F${idx + 1}`;
-        track.appendChild(thumb);
-    });
+function updateScene() {
+    renderScene(ctx, rig, [], 0);
 }
 
-renderScene(ctx, rig, [], 0);
+// العرض الأولي
+updateScene();
