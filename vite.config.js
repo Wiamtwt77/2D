@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  server: {
-    port: 3000
-  }
+  // إضافة المصفوفة الفارغة لتجاوز خطأ Wrangler
+  plugins: [],
+  // أي إعدادات أخرى لديكِ تبقى كما هي
 });
