@@ -1,183 +1,50 @@
-:root {
-    --bg-main: #1a1a2e;
-    --bg-panel: #16213e;
-    --accent: #0f3460;
-    --highlight: #e94560;
-    --text-primary: #ffffff;
-    --text-secondary: #a0aec0;
-    --border: #2a3b5c;
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-body {
-    background-color: var(--bg-main);
-    color: var(--text-primary);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.toolbar {
-    height: 50px;
-    background-color: var(--bg-panel);
-    border-bottom: 1px solid var(--border);
+.scenes-bar {
+    height: 55px;
+    background-color: #111625;
+    border-top: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
 }
 
-.logo {
-    font-weight: bold;
-    color: var(--highlight);
-    letter-spacing: 1px;
-}
-
-.toolbar-group {
+.scenes-list {
     display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.toolbar-group button, .toolbar-group select {
-    background: var(--accent);
-    color: var(--text-primary);
-    border: 1px solid var(--border);
-    padding: 5px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-.toolbar-group button:hover {
-    background: var(--highlight);
-}
-
-.main-layout {
+    gap: 8px;
+    overflow-x: auto;
     flex: 1;
-    display: flex;
-    overflow: hidden;
+    padding: 5px 0;
 }
 
-.sidebar {
-    width: 320px;
-    background-color: var(--bg-panel);
-    border-left: 1px solid var(--border);
-    padding: 15px;
-    overflow-y: auto;
-}
-
-.workspace {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(circle, #222b45 0%, #1a1a2e 100%);
-}
-
-canvas {
-    background: #121829;
-    border: 2px solid var(--border);
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-}
-
-.timeline {
-    height: 120px;
-    background-color: var(--bg-panel);
-    border-top: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    padding: 10px 20px;
-}
-
-.timeline-top {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 8px;
-}
-
-.timeline-top button {
+.scene-tab {
     background: var(--accent);
-    color: var(--text-primary);
+    color: var(--text-secondary);
     border: 1px solid var(--border);
     padding: 6px 14px;
     border-radius: 4px;
     cursor: pointer;
     font-size: 12px;
+    white-space: nowrap;
+    transition: all 0.2s;
 }
 
-.timeline-top button:hover {
+.scene-tab.active {
     background: var(--highlight);
-}
-
-.scrub-area {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-    max-width: 300px;
-}
-
-.scrub-area input[type="range"] {
-    width: 100%;
-    cursor: pointer;
-}
-
-.frames-track {
-    flex: 1;
-    background: #121829;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px;
-    overflow-x: auto;
-}
-
-.frame-thumb {
-    min-width: 45px;
-    height: 50px;
-    background: var(--accent);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    cursor: pointer;
-    color: var(--text-secondary);
-}
-
-.frame-thumb.active {
-    border-color: var(--highlight);
     color: var(--text-primary);
-    background: #233154;
+    border-color: var(--highlight);
+    font-weight: bold;
 }
 
-.upload-section {
-    margin-bottom: 15px;
-    padding: 10px;
-    background: #121829;
-    border-radius: 6px;
-    border: 1px dashed var(--border);
+#addSceneBtn {
+    background: #233154;
+    color: var(--text-primary);
+    border: 1px dashed var(--highlight);
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
 }
-.upload-section h4 {
-    font-size: 13px;
-    margin-bottom: 8px;
-    color: var(--highlight);
-}
-.upload-section input[type="file"] {
-    font-size: 11px;
-    color: var(--text-secondary);
-    width: 100%;
+#addSceneBtn:hover {
+    background: var(--highlight);
 }
