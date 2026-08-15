@@ -1,111 +1,92 @@
+import { SceneManager } from './core/sceneManager.js';
+import { saveProject } from './services/projectService.js';
 import { rig } from './core/rig.js';
-import { renderScene } from './core/renderer.js';
-import { initTouchDrag } from './interaction/touchDrag.js';
-import { initUploadPanel } from './ui/uploadPanel.js';
-import { Timeline } from './animation/timeline.js';
 
+// 1. تهيئة الكانفاس وسياق الرسم
 const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const timeline = new Timeline();
+const ctx = canvas ? canvas.getContext('2d') : null;
 
-let isPlaying = false;
-let playInterval = null;
+// 2. تهيئة مدير المشاهد
+const sceneManager = new SceneManager();
 
-// تهيئة اللوحة الأساسية
-initUploadPanel(rig, () => {
-    updateScene();
-});
-
-// عند سحب العظمة وانتهائها (Mouse Up)، يتم تسجيل Keyframe تلقائياً في الزمن الحالي!
-initTouchDrag(canvas, rig, () => {
-    updateScene();
-}, () => {
-    // حدث عند الانتهاء من السحب (Auto-Keyframing)
-    timeline.setKeyframe(timeline.currentTime, rig.bones);
-    updateKeyframeUI();
-});
-
-// شريط التحكم بالزمن (Scrubber)
-const timeScrubber = document.getElementById('timeScrubber');
-timeScrubber.addEventListener('input', (e) => {
-    timeline.currentTime = parseFloat(e.target.value);
-    document.getElementById('timeDisplayinnerText').innerText = `الوقت: ${timeline.currentTime.toFixed(1)}s`;
+// 3. دالة رسم المشهد الحالي على الكانفاس
+function drawCurrentScene() {
+    if (!ctx || !canvas) return;
     
-    // جلب وضعية الشخصية المحسوبة في هذا الوقت بالذات
-    const evaluatedBones = timeline.evaluate(timeline.currentTime);
-    if (evaluatedBones) {
-        rig.bones = evaluatedBones;
+    // مسح الشاشة
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // الحصول على المشهد الحالي
+    const currentScene = sceneManager.getCurrentScene();
+    
+    // تلوين الخلفية
+    ctx.fillStyle = currentScene.background || '#121829';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // رسم العظام الافتراضية الخاصة بالمشهد
+    if (currentScene.bones) {
+        currentScene.bones.forEach(bone => {
+            ctx.beginPath();
+            ctx.arc(bone.x || 150, bone.y || 150, 8, 0, Math.PI * 2);
+            ctx.fillStyle = '#e94560';
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+            ctx.closePath();
+        });
     }
-    renderScene(ctx, rig, [], 0);
-});
-
-// زر التشغيل (Play)
-document.getElementById('playBtn').addEventListener('click', () => {
-    if (isPlaying) {
-        clearInterval(playInterval);
-        isPlaying = false;
-        document.getElementById('playBtn').innerText = '▶️ تشغيل المشهد';
-        return;
-    }
-
-    if (timeline.getKeyframeCount() < 2) {
-        alert('يرجى تحريك الشخصية في أوقات مختلفة أولاً لإنشاء حركات مفتاحية (Keyframes)!');
-        return;
-    }
-
-    isPlaying = true;
-    document.getElementById('playBtn').innerText = '⏸️ إيقاف مؤقت';
-    timeline.currentTime = 0;
-
-    playInterval = setInterval(() => {
-        timeline.currentTime += 0.1;
-        if (timeline.currentTime > timeline.duration) {
-            timeline.currentTime = 0;
-        }
-        timeScrubber.value = timeline.currentTime;
-        document.getElementById('timeDisplay').innerText = `الوقت: ${timeline.currentTime.toFixed(1)}s`;
-
-        const evaluatedBones = timeline.evaluate(timeline.currentTime);
-        if (evaluatedBones) {
-            rig.bones = evaluatedBones;
-        }
-        renderScene(ctx, rig, [], 0);
-    }, 100);
-});
-
-document.getElementById('resetPoseBtn').addEventListener('click', () => {
-    window.location.reload();
-});
-
-document.getElementById('clearTimelineBtn').addEventListener('click', () => {
-    timeline.clear();
-    updateKeyframeUI();
-    renderScene(ctx, rig, [], 0);
-});
-
-function updateKeyframeUI() {
-    document.getElementById('keyframeCount').innerText = `الـ Keyframes: ${timeline.getKeyframeCount()}`;
 }
 
-function updateScene() {
-    renderScene(ctx, rig, [], 0);
-    import { saveProject } from './services/projectService.js';
+// 4. تحديث شريط عرض المشاهد في الواجهة
+function renderSceneTabs() {
+    const list = document.getElementById('scenesList');
+    if (!list) return;
+    
+    list.innerHTML = ''; // تفريغ الشريط القديم
+    
+    sceneManager.scenes.forEach((scene, index) => {
+        const btn = document.createElement('button');
+        btn.className = `scene-tab ${index === sceneManager.currentSceneIndex ? 'active' : ''}`;
+        btn.innerText = `🎬 ${scene.name}`;
+        
+        // عند الضغط على أي مشهد يتم التبديل إليه
+        btn.onclick = () => {
+            sceneManager.switchScene(index);
+            renderSceneTabs();
+            drawCurrentScene();
+        };
+        list.appendChild(btn);
+    });
+}
 
-// دالة تجريبية للتأكد من الربط
-async function testConnection() {
-    const mockScenes = [{ name: "مشهد تجريبي", bones: [] }];
+// 5. ربط زر إضافة مشهد جديد
+const addSceneBtn = document.getElementById('addSceneBtn');
+if (addSceneBtn) {
+    addSceneBtn.addEventListener('click', () => {
+        sceneManager.addScene();
+        renderSceneTabs();
+        drawCurrentScene();
+    });
+}
+
+// 6. دالة اختبار الحفظ في سوبابايز تلقائياً عند التشغيل
+async function testSupabaseConnection() {
     try {
         console.log("جاري محاولة الحفظ في سوبابايز...");
-        const result = await saveProject("مشروع اختباري", mockScenes);
-        console.log("تم الحفظ بنجاح! معرف المشروع هو:", result.id);
+        const scenesData = sceneManager.scenes;
+        const result = await saveProject("مشروع استوديو التحريك", scenesData);
+        console.log("تم الحفظ بنجاح في السحابة! معرف المشروع:", result.id);
     } catch (error) {
-        console.error("حدث خطأ أثناء الربط:", error);
+        console.error("فشل الاتصال أو الحفظ في سوبابايز:", error);
     }
 }
 
-// استدعي الدالة
-testConnection();
+// 7. التشغيل الأولي للتطبيق
+function initStudio() {
+    renderSceneTabs();
+    drawCurrentScene();
+    testSupabaseConnection();
 }
 
-// العرض الأولي
-updateScene();
+initStudio();
