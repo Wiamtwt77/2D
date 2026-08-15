@@ -89,6 +89,22 @@ function updateKeyframeUI() {
 
 function updateScene() {
     renderScene(ctx, rig, [], 0);
+    import { saveProject } from './services/projectService.js';
+
+// دالة تجريبية للتأكد من الربط
+async function testConnection() {
+    const mockScenes = [{ name: "مشهد تجريبي", bones: [] }];
+    try {
+        console.log("جاري محاولة الحفظ في سوبابايز...");
+        const result = await saveProject("مشروع اختباري", mockScenes);
+        console.log("تم الحفظ بنجاح! معرف المشروع هو:", result.id);
+    } catch (error) {
+        console.error("حدث خطأ أثناء الربط:", error);
+    }
+}
+
+// استدعي الدالة
+testConnection();
 }
 
 // العرض الأولي
