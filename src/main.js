@@ -23,7 +23,7 @@ function drawCurrentScene() {
     ctx.fillStyle = currentScene.background || '#121829';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // رسم العظام الافتراضية الخاصة بالمشهد
+    // رسم العظام الافتراضية
     if (currentScene.bones) {
         currentScene.bones.forEach(bone => {
             ctx.beginPath();
@@ -38,19 +38,18 @@ function drawCurrentScene() {
     }
 }
 
-// 4. تحديث شريط عرض المشاهد في الواجهة
+// 4. تحديث قائمة المشاهد في الواجهة الجانبية
 function renderSceneTabs() {
     const list = document.getElementById('scenesList');
     if (!list) return;
     
-    list.innerHTML = ''; // تفريغ الشريط القديم
+    list.innerHTML = '';
     
     sceneManager.scenes.forEach((scene, index) => {
         const btn = document.createElement('button');
         btn.className = `scene-tab ${index === sceneManager.currentSceneIndex ? 'active' : ''}`;
         btn.innerText = `🎬 ${scene.name}`;
         
-        // عند الضغط على أي مشهد يتم التبديل إليه
         btn.onclick = () => {
             sceneManager.switchScene(index);
             renderSceneTabs();
@@ -60,33 +59,64 @@ function renderSceneTabs() {
     });
 }
 
-// 5. ربط زر إضافة مشهد جديد
-const addSceneBtn = document.getElementById('addSceneBtn');
-if (addSceneBtn) {
-    addSceneBtn.addEventListener('click', () => {
-        sceneManager.addScene();
-        renderSceneTabs();
-        drawCurrentScene();
+// 5. ربط أزرار الواجهة والوظائف
+function initStudioEvents() {
+    // زر إضافة مشهد جديد
+    const addSceneBtn = document.getElementById('addSceneBtn');
+    if (addSceneBtn) {
+        addSceneBtn.onclick = () => {
+            sceneManager.addScene();
+            renderSceneTabs();
+            drawCurrentScene();
+        };
+    }
+
+    // زر الحفظ في السحابة
+    const saveCloudBtn = document.getElementById('saveCloudBtn');
+    const saveStatus = document.getElementById('saveStatus');
+    const projectNameInput = document.getElementById('projectNameInput');
+
+    if (saveCloudBtn) {
+        saveCloudBtn.onclick = async () => {
+            try {
+                saveCloudBtn.innerText = "جاري الحفظ...";
+                const projectName = projectNameInput ? projectNameInput.value : "مشروع استوديو التحريك";
+                const scenesData = sceneManager.scenes;
+                
+                const result = await saveProject(projectName, scenesData);
+                
+                if (saveStatus) {
+                    saveStatus.innerText = "تم الحفظ بنجاح في السحابة!";
+                    saveStatus.style.color = "#2ea043";
+                }
+                saveCloudBtn.innerText = "حفظ في السحابة";
+                console.log("تم الحفظ بنجاح، المعرف:", result.id);
+            } catch (error) {
+                console.error("خطأ أثناء الحفظ:", error);
+                if (saveStatus) {
+                    saveStatus.innerText = "فشل الحفظ!";
+                    saveStatus.style.color = "#f85149";
+                }
+                saveCloudBtn.innerText = "حفظ في السحابة";
+            }
+        };
+    }
+
+    // تفاعل أدوات التحريك الجانبية
+    const toolBtns = document.querySelectorAll('.tool-btn');
+    toolBtns.forEach(btn => {
+        btn.onclick = () => {
+            toolBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        };
     });
 }
 
-// 6. دالة اختبار الحفظ في سوبابايز تلقائياً عند التشغيل
-async function testSupabaseConnection() {
-    try {
-        console.log("جاري محاولة الحفظ في سوبابايز...");
-        const scenesData = sceneManager.scenes;
-        const result = await saveProject("مشروع استوديو التحريك", scenesData);
-        console.log("تم الحفظ بنجاح في السحابة! معرف المشروع:", result.id);
-    } catch (error) {
-        console.error("فشل الاتصال أو الحفظ في سوبابايز:", error);
-    }
-}
-
-// 7. التشغيل الأولي للتطبيق
+// 6. التشغيل الأولي للتطبيق
 function initStudio() {
     renderSceneTabs();
     drawCurrentScene();
-    testSupabaseConnection();
+    initStudioEvents();
 }
 
 initStudio();
