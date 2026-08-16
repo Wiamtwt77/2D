@@ -1,50 +1,430 @@
-.scenes-bar {
-    height: 55px;
-    background-color: #111625;
-    border-top: 1px solid var(--border);
+:root {
+    --bg-main: #0d1117;
+    --bg-panel: #161b22;
+    --bg-card: #21262d;
+    --border-color: #30363d;
+    --accent-color: #2f81f7;
+    --accent-hover: #58a6ff;
+    --text-main: #c9d1d9;
+    --text-muted: #8b949e;
+    --danger: #f85149;
+    --success: #2ea043;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body.studio-body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* الشريط العلوي */
+.studio-header {
+    height: 52px;
+    background-color: var(--bg-panel);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 0 16px;
 }
 
-.scenes-list {
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: var(--accent-hover);
+}
+
+.project-title-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.project-name-input {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    width: 240px;
+    text-align: center;
+}
+
+.project-name-input:focus {
+    border-color: var(--accent-color);
+    outline: none;
+}
+
+.save-status {
+    font-size: 0.8rem;
+    color: var(--success);
+}
+
+.header-actions {
     display: flex;
     gap: 8px;
-    overflow-x: auto;
-    flex: 1;
-    padding: 5px 0;
 }
 
-.scene-tab {
-    background: var(--accent);
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
+/* الأزرار */
+.btn {
     padding: 6px 14px;
-    border-radius: 4px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
     cursor: pointer;
-    font-size: 12px;
-    white-space: nowrap;
+    font-size: 0.9rem;
+    font-weight: 500;
     transition: all 0.2s;
 }
 
+.btn-primary {
+    background-color: var(--success);
+    color: white;
+    border-color: rgba(27,31,35,0.15);
+}
+
+.btn-primary:hover {
+    background-color: #238636;
+}
+
+.btn-secondary {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+}
+
+.btn-secondary:hover {
+    background-color: #30363d;
+}
+
+.btn-block {
+    width: 100%;
+    margin-top: 8px;
+    background-color: var(--bg-card);
+    color: var(--accent-hover);
+    border: 1px dashed var(--border-color);
+}
+
+.btn-block:hover {
+    border-color: var(--accent-color);
+    background-color: #1f242c;
+}
+
+/* مساحة العمل */
+.studio-workspace {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 260px;
+    background-color: var(--bg-panel);
+    border-left: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    gap: 12px;
+}
+
+.right-sidebar {
+    border-left: none;
+    border-right: 1px solid var(--border-color);
+}
+
+.panel-section {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.panel-section.flex-grow {
+    flex: 1;
+}
+
+.panel-section h3 {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+/* أدوات التحريك */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+}
+
+.tool-btn {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: 0.2s;
+}
+
+.tool-btn.active, .tool-btn:hover {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+/* شجرة العناصر والمشاهد */
+.tree-view, .scenes-list {
+    max-height: 140px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tree-item {
+    padding: 6px 8px;
+    background: var(--bg-panel);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.tree-item.sub {
+    margin-right: 16px;
+    border-right: 2px solid var(--accent-color);
+}
+
+.scene-tab {
+    padding: 8px 10px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: right;
+    font-size: 0.9rem;
+    transition: 0.2s;
+}
+
 .scene-tab.active {
-    background: var(--highlight);
-    color: var(--text-primary);
-    border-color: var(--highlight);
+    background-color: rgba(47, 129, 247, 0.15);
+    border-color: var(--accent-color);
+    color: var(--accent-hover);
     font-weight: bold;
 }
 
-#addSceneBtn {
-    background: #233154;
-    color: var(--text-primary);
-    border: 1px dashed var(--highlight);
-    padding: 6px 14px;
+/* منطقة الكانفاس */
+.viewport-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-main);
+}
+
+.viewport-toolbar {
+    height: 40px;
+    background-color: var(--bg-panel);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.viewport-controls {
+    display: flex;
+    gap: 6px;
+}
+
+.icon-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 4px 8px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 12px;
-    white-space: nowrap;
+    font-size: 0.8rem;
 }
-#addSceneBtn:hover {
-    background: var(--highlight);
+
+.canvas-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: 
+        linear-gradient(45deg, #161b22 25%, transparent 25%), 
+        linear-gradient(-45deg, #161b22 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #161b22 75%), 
+        linear-gradient(-45deg, transparent 75%, #161b22 75%);
+    background-size: 24px 24px;
+    background-position: 0 0, 0 12px, 12px -12px, -12px 0px;
+    background-color: #0b0f15;
+}
+
+canvas {
+    background-color: #121829;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+    border-radius: 6px;
+}
+
+/* الخصائص */
+.prop-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.prop-group label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.prop-input {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.prop-input.inline {
+    display: inline-block;
+    width: 70px;
+}
+
+.prop-color {
+    width: 100%;
+    height: 32px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* الخط الزمني */
+.studio-timeline {
+    height: 130px;
+    background-color: var(--bg-panel);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.timeline-controls-bar {
+    height: 36px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+}
+
+.playback-btns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.play-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.active-play {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+.time-display {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-right: 12px;
+    font-family: monospace;
+}
+
+.timeline-tracks {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-main);
+    overflow-x: auto;
+}
+
+.track-ruler {
+    height: 24px;
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding-right: 150px;
+    gap: 45px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.track-row {
+    display: flex;
+    align-items: center;
+    height: 34px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.track-name {
+    width: 150px;
+    padding: 0 12px;
+    font-size: 0.8rem;
+    color: var(--text-main);
+    background-color: var(--bg-panel);
+    border-left: 1px solid var(--border-color);
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.keyframes-track {
+    flex: 1;
+    position: relative;
+    height: 100%;
+    background-color: var(--bg-main);
+}
+
+.keyframe-marker {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    background-color: var(--accent-hover);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--accent-color);
 }

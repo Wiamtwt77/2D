@@ -1,8 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
 // الحصول على متغيرات البيئة من Vite
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('تحذير: مفاتيح سوبابايز غير موجودة في متغيرات البيئة!');
+}
 
 /**
  * عميل Supabase - للاتصال بخادم Supabase

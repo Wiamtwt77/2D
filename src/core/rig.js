@@ -1,13 +1,29 @@
-export const rig = {
+// src/core/rig.js
+
+export const Rig = {
     bones: [
-        { id: 0, name: 'الجذع/الحوض (Root)', x: 425, y: 220, length: 0, parent: null },
-        { id: 1, name: 'الكتف الأيمن', x: 395, y: 150, length: 30, parent: 0 },
-        { id: 2, name: 'الاليد العليا (R. Upper Arm)', x: 350, y: 180, length: 50, parent: 1 },
-        { id: 3, name: 'اليد السفلى واليد (R. Hand)', x: 310, y: 210, length: 50, parent: 2 },
-        
-        { id: 4, name: 'الكتف الأيسر', x: 455, y: 150, length: 30, parent: 0 },
-        { id: 5, name: 'اليد اليسرى العليا (L. Upper Arm)', x: 500, y: 180, length: 50, parent: 4 },
-        { id: 6, name: 'اليد اليسرى السفلى (L. Hand)', x: 540, y: 210, length: 50, parent: 5 },
+        { id: 'root', name: 'الجذع (Root)', x: 400, y: 250, rotation: 0, parent: null, image: null },
+        { id: 'arm_l', name: 'اليد اليسرى', x: 350, y: 200, rotation: 0, parent: 'root', image: null },
+        { id: 'arm_r', name: 'اليد اليمنى', x: 450, y: 200, rotation: 0, parent: 'root', image: null },
+        { id: 'head', name: 'الرأس', x: 400, y: 150, rotation: 0, parent: 'root', image: null }
     ],
-    textures: {}
+
+    // ربط صورة عينة بعظمة معينة
+    attachImageToBone(boneId, imageObj) {
+        const bone = this.bones.find(b => b.id === boneId);
+        if (bone) {
+            bone.image = imageObj;
+            console.log(`تم ربط الصورة بنجاح بالعظمة: ${bone.name}`);
+        }
+    },
+
+    // تحديث موقع أو زاوية عظمة
+    updateBoneTransform(boneId, data) {
+        const bone = this.bones.find(b => b.id === boneId);
+        if (bone) {
+            if (data.x !== undefined) bone.x = data.x;
+            if (data.y !== undefined) bone.y = data.y;
+            if (data.rotation !== undefined) bone.rotation = data.rotation;
+        }
+    }
 };
