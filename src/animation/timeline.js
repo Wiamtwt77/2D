@@ -1,48 +1,49 @@
-import { interpolateBones } from './easing.js';
+// src/animation/timeline.js
 
-export class Timeline {
-    constructor() {
-        this.keyframes = {}; // مفتاحها هو الوقت بالثواني (مثلاً: 0.0, 1.2)
-        this.currentTime = 0.0;
-        this.duration = 5.0;
+export class TimelineManager {
+    constructor(onFrameUpdate) {
+        this.currentFrame = 0;
+        this.totalFrames = 50;
+        this.isPlaying = false;
+        this.fps = 30;
+        this.keyframes = {}; // مثال: { 0: {boneId: {x, y, rotation}}, 15: {...} }
+        this.onFrameUpdate = onFrameUpdate;
+        this.timer = null;
     }
 
-    // تسجيل فريم مفتاحي تلقائياً عند الوقت الحالي
-    setKeyframe(time, bonesData) {
-        const roundedTime = Math.round(time * 10) / 10;
-        this.keyframes[roundedTime] = JSON.parse(JSON.stringify(bonesData));
-    }
-
-    clear() {
-        this.keyframes = {};
-        this.currentTime = 0.0;
-    }
-
-    getKeyframeCount() {
-        return Object.keys(this.keyframes).length;
-    }
-
-    // حساب الحالة الحالية للشخصية في أي جزء من الثانية عبر الـ Interpolation
-    evaluate(time) {
-        const times = Object.keys(this.keyframes).map(Number).sort((a, b) => a - b);
-        
-        if (times.length === 0) return null;
-        if (times.length === 1 || time <= times[0]) return this.keyframes[times[0]];
-        if (time >= times[times.length - 1]) return this.keyframes[times[times.length - 1]];
-
-        // البحث عن أقرب نقطتي Keyframe ليتم الدمج بينهما بسلاسة
-        let t1 = times[0];
-        let t2 = times[times.length - 1];
-
-        for (let i = 0; i < times.length - 1; i++) {
-            if (time >= times[i] && time <= times[i + 1]) {
-                t1 = times[i];
-                t2 = times[i + 1];
-                break;
-            }
+    addKeyframe(frameIndex, boneId, transformData) {
+        if (!this.keyframes[frameIndex]) {
+            this.keyframes[frameIndex] = {};
         }
+        this.keyframes[frameIndex][boneId] = { ...transformData };
+        console.log(`تم إضافة كيفريم عند الإطار ${frameIndex} للعظمة ${boneId}`);
+    }
 
-        const progress = (time - t1) / (t2 - t1);
-        return interpolateBones(this.keyframes[t1], this.keyframes[t2], progress);
+    play() {
+        if (this.isPlaying) return;
+        this.isPlaying = true;
+        const interval = 1000 / this.fps;
+
+        this.timer = setInterval(() => {
+            this.currentFrame++;
+            if (this.currentFrame > this.totalFrames) {
+                this.currentFrame = 0; // إعادة التكرار
+            }
+            if (this.onFrameUpdate) {
+                this.onFrameUpdate(this.currentFrame);
+            }
+        }, interval);
+    }
+
+    pause() {
+        this.isPlaying = false;
+        clearInterval(this.timer);
+    }
+
+    setFrame(frame) {
+        this.currentFrame = frame;
+        if (this.onFrameUpdate) {
+            this.onFrameUpdate(this.currentFrame);
+        }
     }
 }
