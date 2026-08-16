@@ -1,47 +1,45 @@
-export function renderScene(ctx, rig, onionSkinFrames = [], currentFrameIndex = 0) {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+// src/core/renderer.js
 
-    onionSkinFrames.forEach((frame, idx) => {
-        ctx.save();
-        ctx.globalAlpha = 0.2 + (idx * 0.05);
-        ctx.strokeStyle = '#e94560';
-        drawSkeleton(ctx, frame.bones, rig.textures);
-        ctx.restore();
-    });
+export function renderScene(ctx, rig, currentSceneIndex) {
+    if (!ctx) return;
 
-    drawSkeleton(ctx, rig.bones, rig.textures);
-}
-
-function drawSkeleton(ctx, bones, textures) {
-    bones.forEach(bone => {
-        if (bone.parent !== null) {
-            const parent = bones[bone.parent];
-            ctx.beginPath();
-            ctx.moveTo(parent.x, parent.y);
-            ctx.lineTo(bone.x, bone.y);
-            ctx.strokeStyle = '#0f3460';
-            ctx.lineWidth = 6;
-            ctx.stroke();
+    // رسم خطوط الربط بين العظام (الأب والابن)
+    rig.bones.forEach(bone => {
+        if (bone.parent) {
+            const parentBone = rig.bones.find(b => b.id === bone.parent);
+            if (parentBone) {
+                ctx.beginPath();
+                ctx.moveTo(parentBone.x, parentBone.y);
+                ctx.lineTo(bone.x, bone.y);
+                ctx.strokeStyle = '#30363d';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+                ctx.closePath();
+            }
         }
     });
 
-    bones.forEach(bone => {
+    // رسم مفاصل العظام والصور المرتبطة بها
+    rig.bones.forEach(bone => {
         ctx.save();
         ctx.translate(bone.x, bone.y);
-        
-        if (textures && textures[bone.id]) {
-            const img = textures[bone.id];
-            ctx.drawImage(img, -20, -20, 40, 40);
+        ctx.rotate((bone.rotation * Math.PI) / 180);
+
+        // إذا كانت هناك صورة مربوطة بالعظمة، يتم رسمها مع مراعاة التمحور
+        if (bone.image) {
+            ctx.drawImage(bone.image, -25, -25, 50, 50);
         } else {
+            // رسم دائرة العظمة الافتراضية
             ctx.beginPath();
-            ctx.arc(0, 0, 8, 0, Math.PI * 2);
-            ctx.fillStyle = '#e94560';
+            ctx.arc(0, 0, 7, 0, Math.PI * 2);
+            ctx.fillStyle = '#2f81f7';
             ctx.fill();
-            ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ffffff';
             ctx.stroke();
+            ctx.closePath();
         }
-        
+
         ctx.restore();
     });
 }
