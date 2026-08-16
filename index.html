@@ -4,40 +4,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twencraft Animation Studio</title>
-    <link rel="stylesheet" href="./src/style.css">
+    <link rel="stylesheet" href="./style.css">
 </head>
-<body>
-    <header class="toolbar">
-        <div class="logo">🎬 TWENCRAFT STUDIO</div>
-        <div class="toolbar-group">
-            <span id="sceneTitle" style="font-size: 13px; color: #e94560; font-weight: bold;">المشهد: 1</span>
-            <span id="timeDisplay" style="font-size: 13px; color: #a0aec0;">الوقت: 0.0s</span>
-            <button id="resetPoseBtn">🧍 إعادة تعيين</button>
+<body class="studio-body">
+    <!-- الشريط العلوي -->
+    <header class="studio-header">
+        <div class="logo-area">
+            <span class="logo-icon">🎬</span>
+            <span class="logo-text">Twencraft Studio</span>
+        </div>
+        <div class="project-title-area">
+            <input type="text" id="projectNameInput" value="مشروع استوديو التحريك" class="project-name-input">
+            <span class="save-status" id="saveStatus">حفظ تلقائي مفعل</span>
+        </div>
+        <div class="header-actions">
+            <button id="saveCloudBtn" class="btn btn-primary">حفظ في السحابة</button>
+            <button id="exportBtn" class="btn btn-secondary">تصدير مشروع</button>
         </div>
     </header>
 
-    <div class="main-layout">
-        <aside class="sidebar" id="sidebar"></aside>
-        <main class="workspace">
-            <canvas id="canvas" width="850" height="520"></canvas>
-        </main>
-    </div>
-
-    <!-- شريط إدارة المشاهد (Scenes Bar) -->
-    <div class="scenes-bar" id="scenesBar">
-        <div class="scenes-list" id="scenesList"></div>
-        <button id="addSceneBtn">➕ مشهد جديد</button>
-    </div>
-
-    <footer class="timeline">
-        <div class="timeline-controls">
-            <button id="playBtn">▶️ تشغيل المشهد</button>
-            <button id="clearTimelineBtn">🗑️ مسح حركة المشهد</button>
-            <div class="scrub-area">
-                <span style="font-size:11px;">الزمن:</span>
-                <input type="range" id="timeScrubber" min="0" max="5" step="0.1" value="0">
+    <!-- مساحة العمل الرئيسية -->
+    <div class="studio-workspace">
+        <!-- الشريط الجانبي الأيسر: الأدوات وهيكل العظام ومشاهد التحريك -->
+        <aside class="sidebar left-sidebar">
+            <div class="panel-section">
+                <h3>أدوات التحريك</h3>
+                <div class="tools-grid">
+                    <button class="tool-btn active" title="اختيار">↖</button>
+                    <button class="tool-btn" title="إضافة عظمة">🦴</button>
+                    <button class="tool-btn" title="تدوير">🔄</button>
+                    <button class="tool-btn" title="تحريك">↔</button>
+                </div>
             </div>
-            <span id="keyframeCount" style="font-size: 11px; color: #a0aec0;">الـ Keyframes: 0</span>
+            <div class="panel-section">
+                <h3>هيكل العظام (Bones)</h3>
+                <div id="bonesTree" class="tree-view">
+                    <div class="tree-item">🦴 الجذع (Root)</div>
+                    <div class="tree-item sub">🦴 اليد اليمنى</div>
+                    <div class="tree-item sub">🦴 اليد اليسرى</div>
+                </div>
+            </div>
+            <div class="panel-section flex-grow">
+                <h3>إدارة المشاهد</h3>
+                <div id="scenesList" class="scenes-list">
+                    <!-- ستضاف المشاهد هنا برمجياً -->
+                </div>
+                <button id="addSceneBtn" class="btn btn-block">+ إضافة مشهد جديد</button>
+            </div>
+        </aside>
+
+        <!-- منطقة العرض (Canvas Viewport) -->
+        <main class="viewport-area">
+            <div class="viewport-toolbar">
+                <span class="view-title">منطقة الرسم والتحريك (Viewport)</span>
+                <div class="viewport-controls">
+                    <button class="icon-btn">🔍+</button>
+                    <button class="icon-btn">🔍-</button>
+                    <button class="icon-btn">🎯 مركز العرض</button>
+                </div>
+            </div>
+            <div class="canvas-container">
+                <canvas id="canvas" width="800" height="500"></canvas>
+            </div>
+        </main>
+
+        <!-- الشريط الجانبي الأيمن: الخصائص والإعدادات -->
+        <aside class="sidebar right-sidebar">
+            <div class="panel-section">
+                <h3>خصائص العنصر</h3>
+                <div class="prop-group">
+                    <label>الموقع الأفقي (X)</label>
+                    <input type="number" value="150" class="prop-input">
+                </div>
+                <div class="prop-group">
+                    <label>الموقع الرأسي (Y)</label>
+                    <input type="number" value="150" class="prop-input">
+                </div>
+                <div class="prop-group">
+                    <label>الزاوية (Rotation)</label>
+                    <input type="number" value="0" class="prop-input">
+                </div>
+                <div class="prop-group">
+                    <label>لون العظمة</label>
+                    <input type="color" value="#e94560" class="prop-color">
+                </div>
+            </div>
+            <div class="panel-section">
+                <h3>خصائص الخلفية</h3>
+                <div class="prop-group">
+                    <label>لون خلفية المشهد</label>
+                    <input type="color" value="#121829" class="prop-color">
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- الخط الزمني السفلي (Timeline) -->
+    <footer class="studio-timeline">
+        <div class="timeline-controls-bar">
+            <div class="playback-btns">
+                <button class="play-btn">⏮</button>
+                <button class="play-btn active-play">▶ تشغيل</button>
+                <button class="play-btn">⏭</button>
+                <span class="time-display">00:00 / 05:00 ( الإطار: 0 )</span>
+            </div>
+            <div class="fps-selector">
+                <label>FPS:</label>
+                <select class="prop-input inline">
+                    <option>24</option>
+                    <option>30</option>
+                    <option>60</option>
+                </select>
+            </div>
+        </div>
+        <div class="timeline-tracks">
+            <div class="track-ruler">
+                <span>1</span><span>5</span><span>10</span><span>15</span><span>20</span><span>25</span><span>30</span><span>35</span><span>40</span><span>45</span><span>50</span>
+            </div>
+            <div class="track-row">
+                <div class="track-name">التحريك (Bones)</div>
+                <div class="keyframes-track">
+                    <div class="keyframe-marker" style="left: 10%;"></div>
+                    <div class="keyframe-marker" style="left: 45%;"></div>
+                    <div class="keyframe-marker" style="left: 80%;"></div>
+                </div>
+            </div>
         </div>
     </footer>
 
