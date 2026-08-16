@@ -1,33 +1,64 @@
-export function initUploadPanel(rig, onUploadComplete) {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.innerHTML = `<h3>🎨 لوحة رفع الأجزاء (12 عظمة)</h3><br/>`;
+// src/ui/uploadPanel.js
 
-    rig.bones.forEach(bone => {
-        const div = document.createElement('div');
-        div.className = 'upload-section';
-        div.innerHTML = `
-            <h4>${bone.name}</h4>
-            <input type="file" accept="image/*" data-bone-id="${bone.id}">
-        `;
-        sidebar.appendChild(div);
-    });
+export class UploadPanel {
+    constructor(onImageLoaded) {
+        this.onImageLoaded = onImageLoaded;
+        this.initUploadListener();
+    }
 
-    sidebar.querySelectorAll('input[type="file"]').forEach(input => {
-        input.addEventListener('change', (e) => {
-            const boneId = parseInt(e.target.getAttribute('data-bone-id'));
+    initUploadListener() {
+        // إنشاء عنصر رفع ملفات مخفي أو ربطه بزر في الواجهة إذا وجد
+        const uploadInput = document.getElementById('imageUploadInput');
+        if (uploadInput) {
+            uploadInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.src = event.target.result;
+                        img.onload = () => {
+                            if (this.onImageLoaded) {
+                                this.onImageLoaded(img, file.name);
+                            }
+                        };
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    }
+
+    // دالة مساعدة لإنشاء زر الرفع برمجياً إذا لم يكن موجوداً
+    static createUploadButton(containerId, callback) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.id = 'dynamicImageUpload';
+        input.style.display = 'none';
+
+        input.onchange = (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     const img = new Image();
                     img.src = event.target.result;
-                    img.onload = () => {
-                        rig.textures[boneId] = img;
-                        if (onUploadComplete) onUploadComplete();
-                    };
+                    img.onload = () => callback(img, file.name);
                 };
                 reader.readAsDataURL(file);
             }
-        });
-    });
+        };
+
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-secondary';
+        btn.innerText = '📁 رفع صورة عظمة/شخصية';
+        btn.onclick = () => input.click();
+
+        container.appendChild(input);
+        container.appendChild(btn);
+    }
 }
