@@ -1,14 +1,14 @@
-import { Timeline } from '../animation/timeline.js';
-import { rig } from './rig.js';
+import { TimelineManager } from '../animation/timeline.js';
+import { Rig } from './rig.js';
 
 export class Scene {
     constructor(id, name) {
         this.id = id;
         this.name = name;
         this.background = '#121829';
-        this.timeline = new Timeline();
+        this.timeline = new TimelineManager();
         // نسخ هيكل الشخصية الافتراضي لهذا المشهد
-        this.bones = JSON.parse(JSON.stringify(rig.bones));
+        this.bones = JSON.parse(JSON.stringify(Rig.bones));
         this.audio = null;
     }
 }
